@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}CMS EARTH MOVERS{% endblock %}</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <img
+    src="{{ url_for('static', filename='JCB.jpg') }}"
+    alt="JCB Logo"
+    class="brand-logo"
+>
+
+    <style>
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 12px 24px;
+            background: #142d4e;
+            color: white;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .brand-placeholder {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #b8c7d9;
+            border-radius: 8px;
+            color: #b8c7d9;
+            font-size: 11px;
+            font-weight: normal;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            background: #294a70;
+        }
+
+        .nav-clock {
+            font-size: 13px;
+            color: #e0eaf5;
+            white-space: nowrap;
+        }
+
+        .main-content {
+            padding: 24px;
+            min-height: 70vh;
+        }
+
+        @media (max-width: 700px) {
+            .navbar {
+                padding: 12px;
+            }
+
+            .nav-links {
+                width: 100%;
+            }
+
+            .nav-links a {
+                padding: 8px;
+                font-size: 13px;
+            }
+
+            .main-content {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="navbar">
+
+        <!-- LOGO AREA: Add your own logo when ready -->
+        <a class="brand" href="{{ url_for('index') }}">
+
+            <!--
+            To use your own logo:
+            1. Create a folder named "static" if it does not exist.
+            2. Put your logo inside it, for example: static/logo.png
+            3. Replace the placeholder below with the img tag shown later.
+            -->
+
+            <span class="brand-placeholder">LOGO</span>
+
+            <span>CMS EARTH MOVERS</span>
+        </a>
+
+        <!-- Main navigation -->
+        <nav class="nav-links">
+            <a href="{{ url_for('index') }}">New Bill</a>
+            <a href="{{ url_for('history') }}">Bill History</a>
+            <a href="{{ url_for('customers') }}">Customers</a>
+            <a href="{{ url_for('daily_report') }}">Daily Report</a>
+            <a href="{{ url_for('export_bills') }}">Export Bills</a>
+            <a href="{{ url_for('about') }}">About</a>
+        </nav>
+
+        <!-- IST clock -->
+        <div class="nav-clock" id="datetime">Loading time...</div>
+
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer style="text-align:center; padding:16px; color:#667085;">
+        <p>&copy; {{ 2026 }} CMS EARTH MOVERS</p>
+    </footer>
+
+    <script>
+        function updateClock() {
+            const clock = document.getElementById("datetime");
+
+            if (!clock) return;
+
+            clock.textContent = new Intl.DateTimeFormat("en-IN", {
+                timeZone: "Asia/Kolkata",
+                dateStyle: "medium",
+                timeStyle: "medium"
+            }).format(new Date());
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+
+{% extends "base.html" %}
+{% block title %}Bill History | CMS Billing{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">RECORDS</p>
+        <h1>Bill History</h1>
+        <p>Find and view bills saved in your database.</p>
+    </div>
+    <a class="btn primary link-button" href="{{ url_for('index') }}">＋ New Bill</a>
+</div>
+
+<section class="card">
+    <div class="search-row">
+        <input id="historySearch"
+               placeholder="Search bill ID, customer or work..."
+               oninput="filterHistory()">
+        <button class="btn secondary" onclick="loadHistory()">Refresh</button>
+    </div>
+
+    <p id="historyCount" class="helper"></p>
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Bill ID</th><th>Date</th><th>Customer</th>
+                    <th>Work</th><th>Total</th><th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody">
+                <tr><td colspan="6">Loading bills...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block page_script %}
+<script>
+    loadHistory();
+</script>
+{% endblock %}

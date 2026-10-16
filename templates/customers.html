@@ -1,0 +1,42 @@
+
+{% extends "base.html" %}
+{% block title %}Customers | CMS Billing{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">CUSTOMER MANAGEMENT</p>
+        <h1>Customers</h1>
+        <p>Review customer billing activity.</p>
+    </div>
+    <a class="btn primary link-button" href="{{ url_for('index') }}">＋ Create Bill</a>
+</div>
+
+<section class="card">
+    <div class="search-row">
+        <input id="customerSearch" placeholder="Search customer..."
+               oninput="filterCustomers()">
+        <button class="btn secondary" onclick="loadCustomers()">Refresh</button>
+    </div>
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer Name</th><th>Total Bills</th>
+                    <th>Total Billed</th><th>Last Bill</th>
+                </tr>
+            </thead>
+            <tbody id="customerBody">
+                <tr><td colspan="4">Loading customers...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block page_script %}
+<script>
+    loadCustomers();
+</script>
+{% endblock %}

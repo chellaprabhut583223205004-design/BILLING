@@ -1,0 +1,47 @@
+
+{% extends "base.html" %}
+{% block title %}About | CMS Billing{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <div>
+        <p class="eyebrow">SYSTEM INFORMATION</p>
+        <h1>About CMS EARTH MOVERS</h1>
+        <p>A simple billing workspace for JCB and earthmoving services.</p>
+    </div>
+</div>
+
+<section class="card about-card">
+    <div class="about-icon">🚜</div>
+    <h2>CMS EARTH MOVERS</h2>
+    <p>
+        CMS Billing helps you record customer work, working hours,
+        hourly rates, tax and payment totals in one place.
+    </p>
+
+    <div class="feature-grid">
+        <div class="feature">
+            <strong>01</strong>
+            <h3>New Bill</h3>
+            <p>Create, calculate, print and save work bills.</p>
+        </div>
+        <div class="feature">
+            <strong>02</strong>
+            <h3>Bill History</h3>
+            <p>Search and review previously saved records.</p>
+        </div>
+        <div class="feature">
+            <strong>03</strong>
+            <h3>Customers</h3>
+            <p>View customers and their billing activity.</p>
+        </div>
+        <div class="feature">
+            <strong>04</strong>
+            <h3>Local Database</h3>
+            <p>Keep saved records in your local SQLite database.</p>
+        </div>
+    </div>
+
+    <p class="helper">Version 2.0 · Local application · Indian Standard Time</p>
+</section>
+{% endblock %}
