@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMS Billing — 5 Design Drafts</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, sans-serif; background:#0f172a; color:#e2e8f0; }
+  .page-title { text-align:center; padding:32px 16px 8px; font-size:28px; font-weight:800; }
+  .page-sub { text-align:center; color:#94a3b8; margin:0 0 32px; }
+  .draft { margin:0 auto 48px; max-width:1100px; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+  .draft-header { padding:14px 20px; font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
+  .draft-body { padding:20px; }
+
+  /* Common components */
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:800px){ .row{grid-template-columns:1fr;} }
+  .card { border-radius:12px; padding:18px; }
+  .card h3 { margin:0 0 14px; font-size:18px; }
+  label { display:block; font-size:12px; font-weight:600; margin:10px 0 4px; text-transform:uppercase; letter-spacing:.5px; }
+  input, select { width:100%; height:40px; border-radius:8px; padding:0 12px; font-size:14px; border:1px solid; }
+  .btn { border:0; border-radius:8px; padding:10px 14px; font-weight:600; font-size:13px; cursor:pointer; }
+  .summary { border-radius:12px; padding:14px; }
+  .summary-row { display:flex; justify-content:space-between; padding:6px 0; font-size:13px; }
+  .summary-total { display:flex; justify-content:space-between; padding:10px 0; font-size:17px; font-weight:700; }
+  .invoice { border-radius:12px; padding:18px; }
+  .invoice h4 { margin:0 0 2px; }
+  .badge { display:inline-block; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:600; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th,td { padding:8px; border-bottom:1px solid; text-align:left; }
+  th { font-size:10px; text-transform:uppercase; letter-spacing:.5px; }
+
+  /* Style 1: Indigo + Amber */
+  .s1 { --p:#1e3a8a; --a:#f59e0b; --bg:#f8fafc; --surf:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --succ:#10b981; }
+  .s1 .draft-header { background:linear-gradient(135deg,#1e3a8a,#312e81); color:#fff; }
+  .s1 .draft-body { background:#f8fafc; color:#0f172a; }
+  .s1 .card,.s1 .invoice { background:#fff; border:1px solid #e2e8f0; }
+  .s1 .card h3,.s1 .invoice h4 { color:#1e3a8a; }
+  .s1 label { color:#64748b; }
+  .s1 input,.s1 select { background:#f8fafc; border-color:#e2e8f0; color:#0f172a; }
+  .s1 .btn-primary{background:#1e3a8a;color:#fff;} .s1 .btn-accent{background:#f59e0b;color:#1e293b;} .s1 .btn-ghost{background:#f1f5f9;color:#0f172a;}
+  .s1 .summary{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #e2e8f0;}
+  .s1 .summary-total{color:#10b981;}
+  .s1 .badge{background:#dbeafe;color:#1e3a8a;}
+  .s1 th{background:#f1f5f9;color:#64748b;} .s1 th,.s1 td{border-color:#e2e8f0;}
+
+  /* Style 2: Minimal Monochrome + Emerald */
+  .s2 { --p:#111827; --a:#10b981; --bg:#fafafa; --surf:#fff; --text:#111827; --muted:#737373; --border:#e5e5e5; --succ:#10b981; }
+  .s2 .draft-header { background:#111827; color:#fff; }
+  .s2 .draft-body { background:#fafafa; color:#111827; }
+  .s2 .card,.s2 .invoice { background:#fff; border:1px solid #e5e5e5; }
+  .s2 .card h3,.s2 .invoice h4 { color:#111827; }
+  .s2 label { color:#737373; }
+  .s2 input,.s2 select { background:#fafafa; border-color:#e5e5e5; color:#111827; }
+  .s2 .btn-primary{background:#111827;color:#fff;} .s2 .btn-accent{background:#10b981;color:#fff;} .s2 .btn-ghost{background:#f5f5f5;color:#111827;}
+  .s2 .summary{background:#f5f5f5;border:1px solid #e5e5e5;}
+  .s2 .summary-total{color:#10b981;}
+  .s2 .badge{background:#d1fae5;color:#065f46;}
+  .s2 th{background:#f5f5f5;color:#737373;} .s2 th,.s2 td{border-color:#e5e5e5;}
+
+  /* Style 3: Dark Slate + Cyan */
+  .s3 { --p:#0ea5e9; --a:#22d3ee; --bg:#0f172a; --surf:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --border:#334155; --succ:#34d399; }
+  .s3 .draft-header { background:linear-gradient(135deg,#0f172a,#1e293b); color:#22d3ee; border-bottom:1px solid #334155; }
+  .s3 .draft-body { background:#0f172a; color:#f1f5f9; }
+  .s3 .card,.s3 .invoice { background:#1e293b; border:1px solid #334155; }
+  .s3 .card h3,.s3 .invoice h4 { color:#22d3ee; }
+  .s3 label { color:#94a3b8; }
+  .s3 input,.s3 select { background:#0f172a; border-color:#334155; color:#f1f5f9; }
+  .s3 .btn-primary{background:#0ea5e9;color:#0f172a;} .s3 .btn-accent{background:#22d3ee;color:#0f172a;} .s3 .btn-ghost{background:#334155;color:#f1f5f9;}
+  .s3 .summary{background:#1e293b;border:1px solid #334155;}
+  .s3 .summary-total{color:#34d399;}
+  .s3 .badge{background:#0c4a6e;color:#7dd3fc;}
+  .s3 th{background:#0f172a;color:#94a3b8;} .s3 th,.s3 td{border-color:#334155;}
+
+  /* Style 4: Warm Earth + Terracotta */
+  .s4 { --p:#9a3412; --a:#ea580c; --bg:#fef7ee; --surf:#fff; --text:#431407; --muted:#9a7b6a; --border:#fed7aa; --succ:#65a30d; }
+  .s4 .draft-header { background:linear-gradient(135deg,#9a3412,#c2410c); color:#fff; }
+  .s4 .draft-body { background:#fef7ee; color:#431407; }
+  .s4 .card,.s4 .invoice { background:#fff; border:1px solid #fed7aa; }
+  .s4 .card h3,.s4 .invoice h4 { color:#9a3412; }
+  .s4 label { color:#9a7b6a; }
+  .s4 input,.s4 select { background:#fff7ed; border-color:#fed7aa; color:#431407; }
+  .s4 .btn-primary{background:#9a3412;color:#fff;} .s4 .btn-accent{background:#ea580c;color:#fff;} .s4 .btn-ghost{background:#ffedd5;color:#9a3412;}
+  .s4 .summary{background:#fff7ed;border:1px solid #fed7aa;}
+  .s4 .summary-total{color:#65a30d;}
+  .s4 .badge{background:#ffedd5;color:#9a3412;}
+  .s4 th{background:#fff7ed;color:#9a7b6a;} .s4 th,.s4 td{border-color:#fed7aa;}
+
+  /* Style 5: Corporate Blue + Gold */
+  .s5 { --p:#0b3c6f; --a:#d4af37; --bg:#f0f4f8; --surf:#fff; --text:#0b2545; --muted:#5b6b7f; --border:#cbd5e1; --succ:#2e7d32; }
+  .s5 .draft-header { background:linear-gradient(135deg,#0b3c6f,#1e5a8a); color:#d4af37; }
+  .s5 .draft-body { background:#f0f4f8; color:#0b2545; }
+  .s5 .card,.s5 .invoice { background:#fff; border:1px solid #cbd5e1; }
+  .s5 .card h3,.s5 .invoice h4 { color:#0b3c6f; }
+  .s5 label { color:#5b6b7f; }
+  .s5 input,.s5 select { background:#f8fafc; border-color:#cbd5e1; color:#0b2545; }
+  .s5 .btn-primary{background:#0b3c6f;color:#d4af37;} .s5 .btn-accent{background:#d4af37;color:#0b3c6f;} .s5 .btn-ghost{background:#e2e8f0;color:#0b3c6f;}
+  .s5 .summary{background:#f8fafc;border:1px solid #cbd5e1;}
+  .s5 .summary-total{color:#2e7d32;}
+  .s5 .badge{background:#dbeafe;color:#0b3c6f;}
+  .s5 th{background:#e2e8f0;color:#5b6b7f;} .s5 th,.s5 td{border-color:#cbd5e1;}
+</style>
+</head>
+<body>
+<h1 class="page-title">CMS Billing — 5 Design Drafts</h1>
+<p class="page-sub">Five distinct color schemes & component styles for the billing website</p>
+
+<!-- Style 1 -->
+<div class="draft s1">
+  <div class="draft-header">① Modern Indigo + Amber — clean SaaS look</div>
+  <div class="draft-body">
+    <div class="row">
+      <div class="card">
+        <h3>Create New Bill</h3>
+        <label>Customer Name</label><input placeholder="Acme Corp">
+        <label>Work Description</label><select><option>Road work</option></select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label>Start</label><input type="time" value="08:00"></div>
+          <div><label>End</label><input type="time" value="12:30"></div>
+        </div>
+        <label>Rate / hr</label><input type="number" value="1500">
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-primary">Calculate</button><button class="btn btn-ghost">Clear</button><button class="btn btn-accent">Save</button>
+        </div>
+        <div class="summary" style="margin-top:12px;">
+          <div class="summary-row"><span>Hours</span><strong>4.5</strong></div>
+          <div class="summary-row"><span>Subtotal</span><strong>₹6,750</strong></div>
+          <div class="summary-total"><span>Total</span><span>₹7,087.50</span></div>
+        </div>
+      </div>
+      <div class="invoice">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div><h4>JCP SERVICE</h4><p style="margin:0;font-size:12px;opacity:.7;">Palamedu, Madurai</p></div><span class="badge">BILL</span></div>
+        <table><thead><tr><th>Sl</th><th>Description</th><th>Hrs</th><th>Rate</th><th>Amt</th></tr></thead><tbody><tr><td>1</td><td>Road work</td><td>4.5</td><td>1500</td><td>6750</td></tr></tbody></table>
+        <div style="text-align:right;margin-top:10px;font-size:13px;"><div>Subtotal ₹6,750</div><div>Tax 5% ₹337.50</div><div class="summary-total" style="justify-content:flex-end;gap:8px;"><span>Total</span><span>₹7,087.50</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Style 2 -->
+<div class="draft s2">
+  <div class="draft-header">② Minimal Monochrome + Emerald — ultra-clean, typography-led</div>
+  <div class="draft-body">
+    <div class="row">
+      <div class="card">
+        <h3>Create New Bill</h3>
+        <label>Customer Name</label><input placeholder="Acme Corp">
+        <label>Work Description</label><select><option>Road work</option></select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label>Start</label><input type="time" value="08:00"></div>
+          <div><label>End</label><input type="time" value="12:30"></div>
+        </div>
+        <label>Rate / hr</label><input type="number" value="1500">
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-primary">Calculate</button><button class="btn btn-ghost">Clear</button><button class="btn btn-accent">Save</button>
+        </div>
+        <div class="summary" style="margin-top:12px;">
+          <div class="summary-row"><span>Hours</span><strong>4.5</strong></div>
+          <div class="summary-row"><span>Subtotal</span><strong>₹6,750</strong></div>
+          <div class="summary-total"><span>Total</span><span>₹7,087.50</span></div>
+        </div>
+      </div>
+      <div class="invoice">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div><h4>JCP SERVICE</h4><p style="margin:0;font-size:12px;opacity:.7;">Palamedu, Madurai</p></div><span class="badge">BILL</span></div>
+        <table><thead><tr><th>Sl</th><th>Description</th><th>Hrs</th><th>Rate</th><th>Amt</th></tr></thead><tbody><tr><td>1</td><td>Road work</td><td>4.5</td><td>1500</td><td>6750</td></tr></tbody></table>
+        <div style="text-align:right;margin-top:10px;font-size:13px;"><div>Subtotal ₹6,750</div><div>Tax 5% ₹337.50</div><div class="summary-total" style="justify-content:flex-end;gap:8px;"><span>Total</span><span>₹7,087.50</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Style 3 -->
+<div class="draft s3">
+  <div class="draft-header">③ Dark Slate + Cyan — modern dark mode</div>
+  <div class="draft-body">
+    <div class="row">
+      <div class="card">
+        <h3>Create New Bill</h3>
+        <label>Customer Name</label><input placeholder="Acme Corp">
+        <label>Work Description</label><select><option>Road work</option></select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label>Start</label><input type="time" value="08:00"></div>
+          <div><label>End</label><input type="time" value="12:30"></div>
+        </div>
+        <label>Rate / hr</label><input type="number" value="1500">
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-primary">Calculate</button><button class="btn btn-ghost">Clear</button><button class="btn btn-accent">Save</button>
+        </div>
+        <div class="summary" style="margin-top:12px;">
+          <div class="summary-row"><span>Hours</span><strong>4.5</strong></div>
+          <div class="summary-row"><span>Subtotal</span><strong>₹6,750</strong></div>
+          <div class="summary-total"><span>Total</span><span>₹7,087.50</span></div>
+        </div>
+      </div>
+      <div class="invoice">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div><h4>JCP SERVICE</h4><p style="margin:0;font-size:12px;opacity:.7;">Palamedu, Madurai</p></div><span class="badge">BILL</span></div>
+        <table><thead><tr><th>Sl</th><th>Description</th><th>Hrs</th><th>Rate</th><th>Amt</th></tr></thead><tbody><tr><td>1</td><td>Road work</td><td>4.5</td><td>1500</td><td>6750</td></tr></tbody></table>
+        <div style="text-align:right;margin-top:10px;font-size:13px;"><div>Subtotal ₹6,750</div><div>Tax 5% ₹337.50</div><div class="summary-total" style="justify-content:flex-end;gap:8px;"><span>Total</span><span>₹7,087.50</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Style 4 -->
+<div class="draft s4">
+  <div class="draft-header">④ Warm Earth + Terracotta — friendly, approachable</div>
+  <div class="draft-body">
+    <div class="row">
+      <div class="card">
+        <h3>Create New Bill</h3>
+        <label>Customer Name</label><input placeholder="Acme Corp">
+        <label>Work Description</label><select><option>Road work</option></select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label>Start</label><input type="time" value="08:00"></div>
+          <div><label>End</label><input type="time" value="12:30"></div>
+        </div>
+        <label>Rate / hr</label><input type="number" value="1500">
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-primary">Calculate</button><button class="btn btn-ghost">Clear</button><button class="btn btn-accent">Save</button>
+        </div>
+        <div class="summary" style="margin-top:12px;">
+          <div class="summary-row"><span>Hours</span><strong>4.5</strong></div>
+          <div class="summary-row"><span>Subtotal</span><strong>₹6,750</strong></div>
+          <div class="summary-total"><span>Total</span><span>₹7,087.50</span></div>
+        </div>
+      </div>
+      <div class="invoice">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div><h4>JCP SERVICE</h4><p style="margin:0;font-size:12px;opacity:.7;">Palamedu, Madurai</p></div><span class="badge">BILL</span></div>
+        <table><thead><tr><th>Sl</th><th>Description</th><th>Hrs</th><th>Rate</th><th>Amt</th></tr></thead><tbody><tr><td>1</td><td>Road work</td><td>4.5</td><td>1500</td><td>6750</td></tr></tbody></table>
+        <div style="text-align:right;margin-top:10px;font-size:13px;"><div>Subtotal ₹6,750</div><div>Tax 5% ₹337.50</div><div class="summary-total" style="justify-content:flex-end;gap:8px;"><span>Total</span><span>₹7,087.50</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Style 5 -->
+<div class="draft s5">
+  <div class="draft-header">⑤ Corporate Blue + Gold — premium, trustworthy</div>
+  <div class="draft-body">
+    <div class="row">
+      <div class="card">
+        <h3>Create New Bill</h3>
+        <label>Customer Name</label><input placeholder="Acme Corp">
+        <label>Work Description</label><select><option>Road work</option></select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label>Start</label><input type="time" value="08:00"></div>
+          <div><label>End</label><input type="time" value="12:30"></div>
+        </div>
+        <label>Rate / hr</label><input type="number" value="1500">
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn-primary">Calculate</button><button class="btn btn-ghost">Clear</button><button class="btn btn-accent">Save</button>
+        </div>
+        <div class="summary" style="margin-top:12px;">
+          <div class="summary-row"><span>Hours</span><strong>4.5</strong></div>
+          <div class="summary-row"><span>Subtotal</span><strong>₹6,750</strong></div>
+          <div class="summary-total"><span>Total</span><span>₹7,087.50</span></div>
+        </div>
+      </div>
+      <div class="invoice">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div><h4>JCP SERVICE</h4><p style="margin:0;font-size:12px;opacity:.7;">Palamedu, Madurai</p></div><span class="badge">BILL</span></div>
+        <table><thead><tr><th>Sl</th><th>Description</th><th>Hrs</th><th>Rate</th><th>Amt</th></tr></thead><tbody><tr><td>1</td><td>Road work</td><td>4.5</td><td>1500</td><td>6750</td></tr></tbody></table>
+        <div style="text-align:right;margin-top:10px;font-size:13px;"><div>Subtotal ₹6,750</div><div>Tax 5% ₹337.50</div><div class="summary-total" style="justify-content:flex-end;gap:8px;"><span>Total</span><span>₹7,087.50</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
