@@ -24,7 +24,7 @@
     box-shadow: 0 3px 12px rgba(30,60,90,.05);
 }
 .panel h2 {
-    color: #142842;
+    color: #1e3a8a;
     font-size: 26px;
     margin: 0 0 20px;
 }
@@ -46,7 +46,7 @@
 }
 .form-group input:focus, .form-group select:focus {
     outline: 2px solid rgba(50,100,232,.2);
-    border-color: #3264e8;
+    border-color: #1e3a8a;
 }
 .form-group input[readonly] { background: #f0f2f4; }
 .two-columns {
@@ -71,14 +71,14 @@
     min-height: 44px;
 }
 .btn:hover { filter: brightness(.94); }
-.calculate { background: #199653; }
+.calculate { background: #10b981; }
 .clear, .new-btn { background: #89949e; }
-.print-btn { background: #3264e8; }
+.print-btn { background: #1e3a8a; }
 .pdf-btn { background: #ed292f; }
 
 .summary {
-    background: #eff7ff;
-    border: 1px solid #c9e0ff;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
     border-radius: 10px;
     padding: 10px 16px 0;
 }
@@ -96,8 +96,8 @@
     overflow-wrap: anywhere;
 }
 .summary-total {
-    background: #d8f8e5;
-    color: #06451e;
+    background: #d1fae5;
+    color: #065f46;
     margin: 0 -16px;
     padding: 15px 16px;
     font-size: 19px;
@@ -111,6 +111,21 @@
     padding: 18px;
     background: white;
     color: #111827;
+    position: relative;
+    overflow: hidden;
+}
+.invoice::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("{{ url_for('static', filename='JCB.jpg') }}") center / 55% no-repeat;
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 0;
+}
+.invoice > * {
+    position: relative;
+    z-index: 1;
 }
 .invoice-header {
     display: flex;
@@ -152,8 +167,8 @@
 }
 .invoice-badge {
     flex-shrink: 0;
-    background: #fff7df;
-    border: 1px solid #d9c98e;
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
     border-radius: 8px;
     padding: 10px;
     font-weight: bold;
@@ -171,7 +186,7 @@
     font-size: 12px;
     overflow-wrap: anywhere;
 }
-.invoice th { background: #dceafb; }
+.invoice th { background: #dbeafe; }
 .invoice th:nth-child(1) { width: 9%; }
 .invoice th:nth-child(2) { width: 31%; }
 .invoice th:nth-child(3) { width: 14%; }
@@ -194,7 +209,7 @@
 .invoice-total-row strong { white-space: nowrap; }
 .grand-total {
     background: #dcfce7;
-    color: #06451e;
+    color: #065f46;
     font-weight: bold;
 }
 .amount-words {
@@ -263,6 +278,19 @@
     }
     .invoice { border: 1px solid #aaa; }
 }
+
+@media (max-width: 640px) {
+    .dashboard { grid-template-columns: 1fr; gap: 12px; }
+    .panel { padding: 14px; border-radius: 10px; }
+    .panel h2 { font-size: 22px; }
+    .button-row { grid-template-columns: 1fr; }
+    .invoice-actions { grid-template-columns: 1fr; }
+    .two-columns { grid-template-columns: 1fr; }
+    .invoice { padding: 10px; }
+    .invoice-header h2 { font-size: 18px; }
+    .details p { font-size: 12px; }
+    .details .key { min-width: 70px; }
+}
 </style>
 
 <div class="dashboard">
@@ -289,17 +317,40 @@
                 <option value="Pond excavation">Pond excavation</option>
                 <option value="Other">Other</option>
             </select>
+            <input id="customWork" type="text"
+                   placeholder="Enter custom work description"
+                   class="hidden" style="margin-top:8px;">
         </div>
 
         <div class="two-columns">
             <div class="form-group">
-                <label for="startTime">Start Time</label>
-                <input id="startTime" type="time" value="08:00">
+                <label>In Time</label>
+                <div style="display:flex;gap:6px;">
+                    <select id="intimeHour"><option value="1" >1</option><option value="2" >2</option><option value="3" >3</option><option value="4" >4</option><option value="5" >5</option><option value="6" >6</option><option value="7" >7</option><option value="8" selected>8</option><option value="9" >9</option><option value="10" >10</option><option value="11" >11</option><option value="12" >12</option></select>
+                    <select id="intimeMinute"><option value="00" selected>00</option><option value="01" >01</option><option value="02" >02</option><option value="03" >03</option><option value="04" >04</option><option value="05" >05</option><option value="06" >06</option><option value="07" >07</option><option value="08" >08</option><option value="09" >09</option><option value="10" >10</option><option value="11" >11</option><option value="12" >12</option><option value="13" >13</option><option value="14" >14</option><option value="15" >15</option><option value="16" >16</option><option value="17" >17</option><option value="18" >18</option><option value="19" >19</option><option value="20" >20</option><option value="21" >21</option><option value="22" >22</option><option value="23" >23</option><option value="24" >24</option><option value="25" >25</option><option value="26" >26</option><option value="27" >27</option><option value="28" >28</option><option value="29" >29</option><option value="30" >30</option><option value="31" >31</option><option value="32" >32</option><option value="33" >33</option><option value="34" >34</option><option value="35" >35</option><option value="36" >36</option><option value="37" >37</option><option value="38" >38</option><option value="39" >39</option><option value="40" >40</option><option value="41" >41</option><option value="42" >42</option><option value="43" >43</option><option value="44" >44</option><option value="45" >45</option><option value="46" >46</option><option value="47" >47</option><option value="48" >48</option><option value="49" >49</option><option value="50" >50</option><option value="51" >51</option><option value="52" >52</option><option value="53" >53</option><option value="54" >54</option><option value="55" >55</option><option value="56" >56</option><option value="57" >57</option><option value="58" >58</option><option value="59" >59</option></select>
+                    <select id="intimeAmPm">
+                        <option selected>AM</option>
+                        <option>PM</option>
+                    </select>
+                </div>
             </div>
             <div class="form-group">
-                <label for="endTime">End Time</label>
-                <input id="endTime" type="time" value="12:30">
+                <label>Out Time</label>
+                <div style="display:flex;gap:6px;">
+                    <select id="outtimeHour"><option value="1" >1</option><option value="2" >2</option><option value="3" >3</option><option value="4" >4</option><option value="5" >5</option><option value="6" >6</option><option value="7" >7</option><option value="8" >8</option><option value="9" >9</option><option value="10" >10</option><option value="11" >11</option><option value="12" selected>12</option></select>
+                    <select id="outtimeMinute"><option value="00" >00</option><option value="01" >01</option><option value="02" >02</option><option value="03" >03</option><option value="04" >04</option><option value="05" >05</option><option value="06" >06</option><option value="07" >07</option><option value="08" >08</option><option value="09" >09</option><option value="10" >10</option><option value="11" >11</option><option value="12" >12</option><option value="13" >13</option><option value="14" >14</option><option value="15" >15</option><option value="16" >16</option><option value="17" >17</option><option value="18" >18</option><option value="19" >19</option><option value="20" >20</option><option value="21" >21</option><option value="22" >22</option><option value="23" >23</option><option value="24" >24</option><option value="25" >25</option><option value="26" >26</option><option value="27" >27</option><option value="28" >28</option><option value="29" >29</option><option value="30" selected>30</option><option value="31" >31</option><option value="32" >32</option><option value="33" >33</option><option value="34" >34</option><option value="35" >35</option><option value="36" >36</option><option value="37" >37</option><option value="38" >38</option><option value="39" >39</option><option value="40" >40</option><option value="41" >41</option><option value="42" >42</option><option value="43" >43</option><option value="44" >44</option><option value="45" >45</option><option value="46" >46</option><option value="47" >47</option><option value="48" >48</option><option value="49" >49</option><option value="50" >50</option><option value="51" >51</option><option value="52" >52</option><option value="53" >53</option><option value="54" >54</option><option value="55" >55</option><option value="56" >56</option><option value="57" >57</option><option value="58" >58</option><option value="59" >59</option></select>
+                    <select id="outtimeAmPm">
+                        <option>AM</option>
+                        <option selected>PM</option>
+                    </select>
+                </div>
             </div>
+        </div>
+
+        <div class="form-group">
+            <label for="breakTime">Break Time (hours)</label>
+            <input id="breakTime" type="number" min="0" step="0.25" value="0">
+            <p class="helper">Times are selected with AM/PM; invoice shows 24-hour time.</p>
         </div>
 
         <div class="form-group">
@@ -313,9 +364,8 @@
                 <input id="rate" type="number" min="0" step="0.01" value="1500">
             </div>
             <div class="form-group">
-                <label for="taxRate">Tax (%)</label>
-                <input id="taxRate" type="number" min="0" max="100"
-                       step="0.01" value="5">
+                <label for="betaRate">Beta (₹/hr)</label>
+                <input id="betaRate" type="number" min="0" step="0.01" value="100">
             </div>
         </div>
 
@@ -325,13 +375,17 @@
             <button type="button" class="btn clear"
                     onclick="clearBill()">Clear</button>
         </div>
+        <button type="button" class="btn" id="saveButton"
+                style="width:100%;background:#14804a;margin-bottom:12px;"
+                onclick="saveBill()">Save Bill</button>
+        <p id="statusMessage" class="helper"></p>
 
         <div class="summary">
             <div class="summary-row"><span>Working Hours</span><strong id="summaryHours">4.5 Hours</strong></div>
             <div class="summary-row"><span>Rate per Hour</span><strong id="summaryRate">₹ 1,500.00</strong></div>
             <div class="summary-row"><span>Subtotal</span><strong id="summarySubtotal">₹ 6,750.00</strong></div>
-            <div class="summary-row"><span id="summaryTaxLabel">Tax (5%)</span><strong id="summaryTax">₹ 337.50</strong></div>
-            <div class="summary-total"><span>Total Amount</span><strong id="summaryTotal">₹ 7,087.50</strong></div>
+            <div class="summary-row"><span id="summaryTaxLabel">Beta</span><strong id="summaryTax">₹ 450.00</strong></div>
+            <div class="summary-total"><span>Total Amount</span><strong id="summaryTotal">₹ 7,200.00</strong></div>
         </div>
     </section>
 
@@ -342,9 +396,9 @@
                      src="{{ url_for('static', filename='JCB.jpg') }}"
                      alt="JCB Logo">
                 <div>
-                    <h2>JCP SERVICE</h2>
-                    <p>Palamedu, Madurai – 625018</p>
-                    <p>Phone: 9876543210</p>
+                    <h2>CMS EARTH MOVERS</h2>
+                    <p>ENFIELD, SINGAMPUNARI, 630502</p>
+                    <p>Phone: 7868949910</p>
                 </div>
             </div>
 
@@ -354,10 +408,14 @@
                     <p><span class="key">Date</span>: <span id="invoiceDate"></span></p>
                     <p><span class="key">Customer</span>: <span id="invoiceCustomer">—</span></p>
                     <p><span class="key">Work</span>: <span id="invoiceDescription">—</span></p>
+                    <p><span class="key">In Time</span>: <span id="invoiceIntime">—</span></p>
+                    <p><span class="key">Break</span>: <span id="invoiceBreak">—</span></p>
+                    <p><span class="key">Out Time</span>: <span id="invoiceOuttime">—</span></p>
                 </div>
                 <div class="invoice-badge">BILL</div>
             </div>
 
+            <div class="table-scroll">
             <table>
                 <thead>
                     <tr>
@@ -378,16 +436,17 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
 
             <div class="invoice-totals">
                 <div class="invoice-total-row"><span>Subtotal</span><strong id="invoiceSubtotal">₹ 6,750.00</strong></div>
-                <div class="invoice-total-row"><span id="invoiceTaxLabel">Tax (5%)</span><strong id="invoiceTax">₹ 337.50</strong></div>
-                <div class="invoice-total-row grand-total"><span>Total</span><strong id="invoiceTotal">₹ 7,087.50</strong></div>
+                <div class="invoice-total-row"><span id="invoiceTaxLabel">Beta</span><strong id="invoiceTax">₹ 450.00</strong></div>
+                <div class="invoice-total-row grand-total"><span>Total</span><strong id="invoiceTotal">₹ 7,200.00</strong></div>
             </div>
 
             <div class="amount-words">
                 <strong>Amount in Words:</strong>
-                <p id="amountWords">Rupees Seven Thousand Eighty Seven and Fifty Paise Only</p>
+                <p id="amountWords">Rupees Seven Thousand Two Hundred Only</p>
             </div>
 
             <div class="invoice-footer">
@@ -406,217 +465,4 @@
         </div>
     </section>
 </div>
-
-<script>
-const $ = id => document.getElementById(id);
-
-function money(value) {
-    return "₹ " + Number(value).toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-}
-
-function getHours() {
-    const start = $("startTime").value;
-    const end = $("endTime").value;
-
-    if (!start || !end) throw new Error("Please enter both working times.");
-
-    const [sh, sm] = start.split(":").map(Number);
-    const [eh, em] = end.split(":").map(Number);
-    let minutes = (eh * 60 + em) - (sh * 60 + sm);
-
-    // Supports a shift that ends after midnight.
-    if (minutes < 0) minutes += 1440;
-    if (minutes <= 0) throw new Error("Working hours must be greater than zero.");
-
-    return minutes / 60;
-}
-
-function updateDate() {
-    const now = new Date();
-    $("invoiceDate").textContent = now.toLocaleDateString("en-IN", {
-        day: "2-digit", month: "short", year: "numeric",
-        timeZone: "Asia/Kolkata"
-    });
-
-    const clock = document.getElementById("datetime");
-    if (clock) {
-        clock.textContent = now.toLocaleString("en-IN", {
-            timeZone: "Asia/Kolkata",
-            dateStyle: "medium",
-            timeStyle: "medium"
-        });
-    }
-}
-
-function updateBillingId() {
-    const now = new Date();
-    const yy = String(now.getFullYear()).slice(-2);
-    const mm = String(now.getMonth() + 1).padStart(2, "0");
-    const dd = String(now.getDate()).padStart(2, "0");
-
-    // Demo ID only: sequential unique IDs require backend/database support.
-    $("billingId").textContent = `CMS${yy}/${mm}/${dd}/001`;
-}
-
-function toWords(amount) {
-    const ones = ["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
-        "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
-    const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-
-    function under1000(n) {
-        let result = "";
-        if (n >= 100) {
-            result += ones[Math.floor(n / 100)] + " Hundred";
-            n %= 100;
-            if (n) result += " ";
-        }
-        if (n >= 20) {
-            result += tens[Math.floor(n / 10)];
-            n %= 10;
-            if (n) result += " " + ones[n];
-        } else if (n > 0) {
-            result += ones[n];
-        }
-        return result;
-    }
-
-    function indian(n) {
-        if (!n) return "Zero";
-        const parts = [];
-        const crore = Math.floor(n / 10000000); n %= 10000000;
-        const lakh = Math.floor(n / 100000); n %= 100000;
-        const thousand = Math.floor(n / 1000); n %= 1000;
-        if (crore) parts.push(under1000(crore) + " Crore");
-        if (lakh) parts.push(under1000(lakh) + " Lakh");
-        if (thousand) parts.push(under1000(thousand) + " Thousand");
-        if (n) parts.push(under1000(n));
-        return parts.join(" ");
-    }
-
-    const paiseTotal = Math.round((amount + Number.EPSILON) * 100);
-    const rupees = Math.floor(paiseTotal / 100);
-    const paise = paiseTotal % 100;
-    let result = "Rupees " + indian(rupees);
-    if (paise) result += " and " + under1000(paise) + " Paise";
-    return result + " Only";
-}
-
-function calculateBill(showErrors = true) {
-    try {
-        const hours = getHours();
-        const rateText = $("rate").value;
-        const taxText = $("taxRate").value;
-        const rate = Number(rateText);
-        const taxRate = Number(taxText);
-        const customer = $("customerName").value.trim();
-        const description = $("workDescription").value;
-
-        if (!customer) throw new Error("Please enter the customer name.");
-        if (!description) throw new Error("Please select a work description.");
-        if (rateText === "" || !Number.isFinite(rate) || rate < 0) {
-            throw new Error("Please enter a valid hourly rate.");
-        }
-        if (taxText === "" || !Number.isFinite(taxRate) ||
-            taxRate < 0 || taxRate > 100) {
-            throw new Error("Tax must be between 0 and 100.");
-        }
-
-        const subtotal = Math.round((hours * rate + Number.EPSILON) * 100) / 100;
-        const tax = Math.round((subtotal * taxRate / 100 + Number.EPSILON) * 100) / 100;
-        const total = Math.round((subtotal + tax + Number.EPSILON) * 100) / 100;
-        const hoursText = String(Number(hours.toFixed(2)));
-
-        $("totalHours").value = hoursText + " Hours";
-        $("summaryHours").textContent = hoursText + " Hours";
-        $("summaryRate").textContent = money(rate);
-        $("summarySubtotal").textContent = money(subtotal);
-        $("summaryTaxLabel").textContent = `Tax (${taxRate}%)`;
-        $("summaryTax").textContent = money(tax);
-        $("summaryTotal").textContent = money(total);
-
-        $("invoiceCustomer").textContent = customer;
-        $("invoiceDescription").textContent = description;
-        $("tableDescription").textContent = description;
-        $("tableHours").textContent = hoursText;
-        $("tableRate").textContent = rate.toLocaleString("en-IN", {
-            minimumFractionDigits: 2, maximumFractionDigits: 2
-        });
-        $("tableAmount").textContent = subtotal.toLocaleString("en-IN", {
-            minimumFractionDigits: 2, maximumFractionDigits: 2
-        });
-
-        $("invoiceSubtotal").textContent = money(subtotal);
-        $("invoiceTaxLabel").textContent = `Tax (${taxRate}%)`;
-        $("invoiceTax").textContent = money(tax);
-        $("invoiceTotal").textContent = money(total);
-        $("amountWords").textContent = toWords(total);
-
-        updateDate();
-        return true;
-    } catch (error) {
-        if (showErrors) alert(error.message);
-        return false;
-    }
-}
-
-function clearBill() {
-    $("customerName").value = "";
-    $("workDescription").value = "";
-    $("startTime").value = "08:00";
-    $("endTime").value = "12:30";
-    $("rate").value = "1500";
-    $("taxRate").value = "5";
-    $("totalHours").value = "";
-
-    $("summaryHours").textContent = "0 Hours";
-    $("summaryRate").textContent = money(0);
-    $("summarySubtotal").textContent = money(0);
-    $("summaryTaxLabel").textContent = "Tax (5%)";
-    $("summaryTax").textContent = money(0);
-    $("summaryTotal").textContent = money(0);
-
-    $("invoiceCustomer").textContent = "—";
-    $("invoiceDescription").textContent = "—";
-    $("tableDescription").textContent = "—";
-    $("tableHours").textContent = "0";
-    $("tableRate").textContent = "0.00";
-    $("tableAmount").textContent = "0.00";
-    $("invoiceSubtotal").textContent = money(0);
-    $("invoiceTaxLabel").textContent = "Tax (5%)";
-    $("invoiceTax").textContent = money(0);
-    $("invoiceTotal").textContent = money(0);
-    $("amountWords").textContent = "Rupees Zero Only";
-}
-
-function printBill() {
-    if (!calculateBill()) return;
-    window.print();
-}
-
-function downloadPDF() {
-    if (!calculateBill()) return;
-    // In the print dialog, select "Save as PDF" as the destination.
-    window.print();
-}
-
-function updateHoursPreview() {
-    try {
-        const hours = getHours();
-        $("totalHours").value = Number(hours.toFixed(2)) + " Hours";
-    } catch {
-        $("totalHours").value = "";
-    }
-}
-
-$("startTime").addEventListener("change", updateHoursPreview);
-$("endTime").addEventListener("change", updateHoursPreview);
-
-updateDate();
-updateBillingId();
-updateHoursPreview();
-setInterval(updateDate, 1000);
-</script>
 {% endblock %}

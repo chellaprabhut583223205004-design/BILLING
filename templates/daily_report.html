@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -6,9 +5,10 @@
     <h2>Daily Collection Report</h2>
 
     <label for="reportDate">Select Date</label>
-    <input type="date" id="reportDate">
-
-    <button onclick="loadReport()">Generate Report</button>
+    <input type="date" id="reportDate" name="date"
+           value="{{ today }}">
+    <button hx-get="/partials/daily-report" hx-target="#reportBody"
+            hx-include="#reportDate" hx-trigger="click">Generate Report</button>
 
     <h3>Total Bills: <span id="billCount">0</span></h3>
     <h3>Total Amount: ₹<span id="totalAmount">0.00</span></h3>
@@ -22,43 +22,18 @@
                 <th>Amount</th>
             </tr>
         </thead>
-        <tbody id="reportBody"></tbody>
+        <tbody id="reportBody" hx-get="/partials/daily-report" hx-trigger="load" hx-include="#reportDate">
+            <tr><td colspan="4">Loading...</td></tr>
+        </tbody>
     </table>
 </div>
 
 <script>
-document.getElementById("reportDate").value =
-    new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Asia/Kolkata",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-    }).format(new Date());
-
-async function loadReport() {
-    const date = document.getElementById("reportDate").value;
-    const response = await fetch(
-        "/api/daily-report?date=" + encodeURIComponent(date)
-    );
-    const data = await response.json();
-
-    document.getElementById("billCount").textContent =
-        data.bill_count;
-
-    document.getElementById("totalAmount").textContent =
-        Number(data.total_amount).toFixed(2);
-
-    document.getElementById("reportBody").innerHTML =
-        data.bills.map(bill => `
-            <tr>
-                <td>${bill.invoice_no}</td>
-                <td>${bill.customer_name}</td>
-                <td>${bill.created_at}</td>
-                <td>₹${Number(bill.total_amount).toFixed(2)}</td>
-            </tr>
-        `).join("");
-}
-
-loadReport();
+document.addEventListener("DOMContentLoaded", function () {
+    const el = document.getElementById("reportDate");
+    if (el && !el.value) {
+        el.value = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+    }
+});
 </script>
 {% endblock %}

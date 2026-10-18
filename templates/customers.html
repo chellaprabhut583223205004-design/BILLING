@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 {% block title %}Customers | CMS Billing{% endblock %}
 
@@ -14,9 +13,10 @@
 
 <section class="card">
     <div class="search-row">
-        <input id="customerSearch" placeholder="Search customer..."
-               oninput="filterCustomers()">
-        <button class="btn secondary" onclick="loadCustomers()">Refresh</button>
+        <input name="q" value="{{ q or '' }}" placeholder="Search customer..."
+               hx-get="/partials/customers" hx-target="#customerBody"
+               hx-trigger="keyup changed delay:300ms" hx-include="this">
+        <button class="btn secondary" hx-get="/partials/customers" hx-target="#customerBody" hx-include="[name='q']">Refresh</button>
     </div>
 
     <div class="table-scroll">
@@ -28,15 +28,18 @@
                 </tr>
             </thead>
             <tbody id="customerBody">
-                <tr><td colspan="4">Loading customers...</td></tr>
+                {% for c in customers %}
+                <tr>
+                    <td>{{ c.customer_name }}</td>
+                    <td>{{ c.total_bills }}</td>
+                    <td>₹ {{ "%.2f"|format(c.total_amount or 0) }}</td>
+                    <td>{{ c.last_billing_date or "—" }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4">No customers found. Save a bill to add a customer.</td></tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
 </section>
-{% endblock %}
-
-{% block page_script %}
-<script>
-    loadCustomers();
-</script>
 {% endblock %}

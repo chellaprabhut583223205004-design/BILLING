@@ -10,12 +10,6 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
 
-    <img
-    src="{{ url_for('static', filename='JCB.jpg') }}"
-    alt="JCB Logo"
-    class="brand-logo"
->
-
     <style>
         .navbar {
             display: flex;
@@ -23,7 +17,7 @@
             justify-content: space-between;
             gap: 20px;
             padding: 12px 24px;
-            background: #142d4e;
+            background: linear-gradient(135deg, #1e3a8a, #312e81);
             color: white;
             flex-wrap: wrap;
         }
@@ -74,13 +68,30 @@
         }
 
         .nav-links a:hover {
-            background: #294a70;
+            background: rgba(255,255,255,.15);
         }
 
         .nav-clock {
             font-size: 13px;
             color: #e0eaf5;
             white-space: nowrap;
+        }
+
+        .nav-toggle {
+            display: none;
+            background: rgba(255,255,255,.15);
+            color: white;
+            border: 0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 700px) {
+            .nav-toggle { display: inline-flex; }
+            .nav-links { display: none; width: 100%; }
+            .nav-links.open { display: flex; }
         }
 
         .main-content {
@@ -123,10 +134,16 @@
             3. Replace the placeholder below with the img tag shown later.
             -->
 
-            <span class="brand-placeholder">LOGO</span>
+            <img class="brand-logo"
+                 src="{{ url_for('static', filename='JCB.jpg') }}"
+                 alt="CMS EARTH MOVERS Logo">
 
             <span>CMS EARTH MOVERS</span>
         </a>
+
+        <!-- Mobile menu toggle -->
+        <button class="nav-toggle" type="button" aria-label="Toggle navigation"
+                onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
 
         <!-- Main navigation -->
         <nav class="nav-links">
@@ -148,7 +165,7 @@
     </main>
 
     <footer style="text-align:center; padding:16px; color:#667085;">
-        <p>&copy; {{ 2026 }} CMS EARTH MOVERS</p>
+        <p>&copy; <span id="footerYear"></span> CMS EARTH MOVERS</p>
     </footer>
 
     <script>
@@ -168,7 +185,14 @@
         setInterval(updateClock, 1000);
     </script>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=5"></script>
+    <script>
+        const y = document.getElementById("footerYear");
+        if (y) y.textContent = new Date().getFullYear();
+    </script>
+    {% block page_script %}{% endblock %}
 
 </body>
 </html>

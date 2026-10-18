@@ -1,0 +1,16 @@
+{% for bill in bills %}
+<tr>
+  <td>{{ bill.bill_id or bill.invoice_no }}</td>
+  <td>{{ bill.created_at }}</td>
+  <td>{{ bill.customer_name }}</td>
+  <td>{{ bill.work_description }}</td>
+  <td>₹ {{ "%.2f"|format(bill.total_amount or 0) }}</td>
+  <td>
+    <a class="btn secondary" href="/?bill={{ bill.id }}">Edit</a>
+    <button class="btn danger" type="button" onclick="deleteBill({{ bill.id }})">Delete</button>
+  </td>
+</tr>
+{% else %}
+<tr><td colspan="6">No matching bills found.</td></tr>
+{% endfor %}
+<span id="historyCount" hx-swap-oob="true" class="helper">{{ bills|length }} bill(s) found</span>

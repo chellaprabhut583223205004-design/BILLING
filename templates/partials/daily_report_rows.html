@@ -1,0 +1,12 @@
+<span id="billCount" hx-swap-oob="true">{{ count }}</span>
+<span id="totalAmount" hx-swap-oob="true">{{ "%.2f"|format(total) }}</span>
+{% for b in bills %}
+<tr>
+  <td>{{ b.invoice_no }}</td>
+  <td>{{ b.customer_name }}</td>
+  <td>{{ b.created_at }}</td>
+  <td>₹ {{ "%.2f"|format(b.total_amount or 0) }}</td>
+</tr>
+{% else %}
+<tr><td colspan="4">No bills found for this date.</td></tr>
+{% endfor %}

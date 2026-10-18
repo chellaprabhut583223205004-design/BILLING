@@ -1,0 +1,10 @@
+{% for c in customers %}
+<tr>
+  <td>{{ c.customer_name }}</td>
+  <td>{{ c.total_bills }}</td>
+  <td>₹ {{ "%.2f"|format(c.total_amount or 0) }}</td>
+  <td>{{ c.last_billing_date or "—" }}</td>
+</tr>
+{% else %}
+<tr><td colspan="4">No customers found. Save a bill to add a customer.</td></tr>
+{% endfor %}
