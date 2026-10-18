@@ -13,9 +13,34 @@ function money(value) {
     });
 }
 
+function to24(timeStr, ampm) {
+    const parts = String(timeStr || "").trim().split(":");
+    if (parts.length < 2) return timeStr;
+    let h = Number(parts[0]);
+    const m = String(parts[1] || "00").trim();
+    const mode = String(ampm || "AM").trim().toUpperCase();
+    if (!Number.isFinite(h)) return timeStr;
+    if (mode === "PM" && h < 12) h += 12;
+    if (mode === "AM" && h === 12) h = 0;
+    return String(h).padStart(2, "0") + ":" + m.padStart(2, "0");
+}
+
+function split12(time24) {
+    if (!time24) return { time: "08:00", ampm: "AM" };
+    const parts = String(time24).trim().split(":");
+    if (parts.length < 2) return { time: time24, ampm: "AM" };
+    let h = Number(parts[0]);
+    const m = String(parts[1] || "00").trim();
+    if (!Number.isFinite(h)) return { time: time24, ampm: "AM" };
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return { time: h + ":" + m.padStart(2, "0"), ampm };
+}
+
 function getWorkDescription() {
     const selected = $("workDescription")?.value;
-    if (selected === "Other") return $("customWork").value.trim();
+    if (selected === "Other") return $("customWork")?.value?.trim() || "";
     return selected || "";
 }
 
@@ -26,45 +51,90 @@ function showStatus(message, error = false) {
     el.style.color = error ? "#c62828" : "#14804a";
 }
 
+function showToast(message, error = false) {
+    let container = document.getElementById("toastContainer");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "toastContainer";
+        container.style.cssText = "position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;";
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement("div");
+    toast.textContent = message;
+    toast.style.cssText = "padding:12px 16px;border-radius:8px;color:#fff;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.2);background:" + (error ? "#c62828" : "#14804a") + ";opacity:0;transition:opacity .2s;";
+    container.appendChild(toast);
+    requestAnimationFrame(() => { toast.style.opacity = "1"; });
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 200);
+    }, 3000);
+}
+
 function formatHours(hours) {
     return Number(hours.toFixed(2)) + " Hours";
 }
 
-function getHours() {
-    const startText = $("startTime").value;
-    const endText = $("endTime").value;
+function getInTime24() {
+    const h = Number($("intimeHour")?.value || 0);
+    const m = Number($("intimeMinute")?.value || 0);
+    const ampm = String($("intimeAmPm")?.value || "AM").toUpperCase();
+    let hour = h;
+    if (ampm === "PM" && hour < 12) hour += 12;
+    if (ampm === "AM" && hour === 12) hour = 0;
+    return String(hour).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+}
 
-    if (!startText || !endText) {
-        throw new Error("Select both start and end times.");
-    }
+function getOutTime24() {
+    const h = Number($("outtimeHour")?.value || 0);
+    const m = Number($("outtimeMinute")?.value || 0);
+    const ampm = String($("outtimeAmPm")?.value || "PM").toUpperCase();
+    let hour = h;
+    if (ampm === "PM" && hour < 12) hour += 12;
+    if (ampm === "AM" && hour === 12) hour = 0;
+    return String(hour).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+}
+
+function split24(time24) {
+    const parts = String(time24).trim().split(":");
+    let h = Number(parts[0] || 0);
+    const m = parts[1] || "00";
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return { h: String(h), m: m, ampm: ampm };
+}
+
+function getHours() {
+    const in24 = getInTime24();
+    const out24 = getOutTime24();
 
     const toMinutes = value => {
-        const parts = value.split(":").map(Number);
+        const parts = String(value).trim().split(":").map(Number);
         return parts[0] * 60 + parts[1];
     };
 
-    const start = toMinutes(startText);
-    let end = toMinutes(endText);
+    const start = toMinutes(in24);
+    let end = toMinutes(out24);
 
-    // Supports work ending after midnight.
     if (end < start) end += 1440;
 
-    const hours = (end - start) / 60;
+    const breakTime = Number($("breakTime")?.value);
+    const breakValue = Number.isFinite(breakTime) ? breakTime : 0;
+    if (breakValue < 0) throw new Error("Break time must be non-negative.");
 
-    if (hours <= 0) {
-        throw new Error("Working hours must be greater than zero.");
-    }
-
-    return hours;
+    const hours = (end - start) / 60 - breakValue;
+    if (hours <= 0) throw new Error("Working hours must be greater than zero.");
+    if (hours > 24) throw new Error("Working hours cannot exceed 24.");
+    return Math.round(hours * 100) / 100;
 }
 
 function readForm() {
-    const customer = $("customerName").value.trim();
+    const customer = $("customerName")?.value?.trim() || "";
     const description = getWorkDescription();
-    const rateText = $("rate").value.trim();
-    const taxText = $("taxRate").value.trim();
+    const rateText = $("rate")?.value?.trim() || "";
+    const betaText = $("betaRate")?.value?.trim() || "";
     const rate = Number(rateText);
-    const tax = Number(taxText);
+    const beta = Number(betaText);
 
     if (!customer || !description) {
         throw new Error("Enter the customer and work description.");
@@ -79,25 +149,31 @@ function readForm() {
         throw new Error("Enter a valid hourly rate.");
     }
 
-    if (!taxText || !Number.isFinite(tax) || tax < 0 || tax > 100) {
-        throw new Error("Enter a tax percentage from 0 to 100.");
+    if (betaText === "" || !Number.isFinite(beta) || beta < 0) {
+        throw new Error("Enter a valid beta amount.");
     }
 
     const hours = getHours();
     const subtotal = Math.round((hours * rate + Number.EPSILON) * 100) / 100;
-    const taxAmount = Math.round((subtotal * tax / 100 + Number.EPSILON) * 100) / 100;
+    const betaAmount = Math.round((hours * beta + Number.EPSILON) * 100) / 100;
+
+    const intime24 = getInTime24();
+    const outtime24 = getOutTime24();
 
     return {
         customer_name: customer,
         work_description: description,
-        start_time: $("startTime").value,
-        end_time: $("endTime").value,
+        intime: intime24,
+        outtime: outtime24,
+        break_time: Number($("breakTime")?.value || 0),
+        start_time: intime24,
+        end_time: outtime24,
         total_hours: hours,
         rate,
-        tax_percentage: tax,
+        beta_rate: beta,
         subtotal,
-        tax_amount: taxAmount,
-        total_amount: Math.round((subtotal + taxAmount) * 100) / 100
+        beta_amount: betaAmount,
+        total_amount: Math.round((subtotal + betaAmount) * 100) / 100
     };
 }
 
@@ -157,46 +233,61 @@ function indianWords(number) {
 }
 
 function renderBill(bill) {
-    if ($("totalHours")) $("totalHours").value = formatHours(bill.total_hours);
-
     const setText = (id, value) => {
         if ($(id)) $(id).textContent = value;
     };
 
-    setText("invoiceNumber", bill.bill_id || bill.invoice_no || "Not saved");
+    // Show the persisted identity first so it is never lost.
+    setText("billingId", bill.bill_id || bill.invoice_no || "Not saved");
     setText("invoiceDate", bill.created_at || "Not saved");
+
+    if ($("totalHours")) $("totalHours").value = formatHours(Number(bill.total_hours) || 0);
     setText("invoiceCustomer", bill.customer_name);
     setText("invoiceDescription", bill.work_description);
-    setText("invoiceTime", `${bill.start_time} – ${bill.end_time} IST`);
+    setText("invoiceIntime", bill.intime || bill.start_time || "—");
+    setText("invoiceBreak", (bill.break_time ?? bill.breaktime ?? 0) + " hr");
+    setText("invoiceOuttime", bill.outtime || bill.end_time || "—");
 
     setText("tableDescription", bill.work_description);
-    setText("tableHours", Number(bill.total_hours).toString());
-    setText("tableRate", Number(bill.rate).toFixed(2));
-    setText("tableAmount", Number(bill.subtotal).toFixed(2));
+    setText("tableHours", Number(bill.total_hours).toFixed(2));
+    setText("tableRate", Number(bill.rate || 0).toFixed(2));
+    setText("tableAmount", Number(bill.subtotal || 0).toFixed(2));
 
-    setText("invoiceSubtotal", money(bill.subtotal));
-    setText("invoiceTaxLabel", `Tax (${bill.tax_percentage}%)`);
-    setText("invoiceTax", money(bill.tax_amount));
-    setText("invoiceTotal", money(bill.total_amount));
+    setText("invoiceSubtotal", money(bill.subtotal || 0));
+    setText("invoiceTaxLabel", "Beta");
+    setText("invoiceTax", money((bill.beta_amount ?? bill.tax_amount ?? 0) || 0));
+    setText("invoiceTotal", money(bill.total_amount || 0));
     setText("amountWords", bill.amount_words || indianWords(bill.total_amount));
 
     setText("summaryHours", formatHours(bill.total_hours));
-    setText("summaryRate", money(bill.rate));
-    setText("summarySubtotal", money(bill.subtotal));
-    setText("summaryTaxLabel", `Tax (${bill.tax_percentage}%)`);
-    setText("summaryTax", money(bill.tax_amount));
-    setText("summaryTotal", money(bill.total_amount));
+    setText("summaryRate", money(bill.rate || 0));
+    setText("summarySubtotal", money(bill.subtotal || 0));
+    setText("summaryTaxLabel", "Beta");
+    setText("summaryTax", money((bill.beta_amount ?? bill.tax_amount ?? 0) || 0));
+    setText("summaryTotal", money(bill.total_amount || 0));
 }
 
 function calculateBill() {
     try {
+        let hours = null;
+        try {
+            hours = getHours();
+            if ($("totalHours")) $("totalHours").value = formatHours(hours);
+            if ($("summaryHours")) $("summaryHours").textContent = formatHours(hours);
+            if ($("tableHours")) $("tableHours").textContent = Number(hours).toString();
+        } catch (e) {
+            if ($("totalHours")) $("totalHours").value = "";
+        }
         const bill = readForm();
+        const today = new Date().toLocaleDateString("en-IN", {
+            timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric"
+        });
         renderBill({
             ...bill,
             bill_id: currentBillId && lastSavedBill
-                ? lastSavedBill.bill_id : "Not saved",
+                ? lastSavedBill.bill_id : "Will be generated on save",
             created_at: currentBillId && lastSavedBill
-                ? lastSavedBill.created_at : "Not saved"
+                ? lastSavedBill.created_at : today
         });
         showStatus("Bill calculated. Save it to create a permanent Bill ID.");
         return true;
@@ -259,8 +350,8 @@ function filterHistory() {
 
     const query = ($("historySearch")?.value || "").toLowerCase();
     const filtered = allBills.filter(bill =>
-        [bill.bill_id, bill.invoice_no, bill.customer_name,
-         bill.work_description, bill.created_at]
+        [bill?.bill_id, bill?.invoice_no, bill?.customer_name,
+         bill?.work_description, bill?.created_at]
             .some(value => String(value || "").toLowerCase().includes(query))
     );
 
@@ -306,24 +397,31 @@ async function loadBill(id) {
         if (!response.ok) throw new Error(bill.error || "Bill not found.");
 
         if ($("customerName")) {
-            $("customerName").value = bill.customer_name;
-            $("startTime").value = bill.start_time;
-            $("endTime").value = bill.end_time;
-            $("rate").value = bill.rate;
-            $("taxRate").value = bill.tax_percentage;
+            if ($("customerName")) $("customerName").value = bill.customer_name;
+            const inSplit = split24(bill.intime || bill.start_time || "08:00");
+            const outSplit = split24(bill.outtime || bill.end_time || "12:30");
+            if ($("intimeHour")) $("intimeHour").value = inSplit.h;
+            if ($("intimeMinute")) $("intimeMinute").value = inSplit.m;
+            if ($("intimeAmPm")) $("intimeAmPm").value = inSplit.ampm;
+            if ($("outtimeHour")) $("outtimeHour").value = outSplit.h;
+            if ($("outtimeMinute")) $("outtimeMinute").value = outSplit.m;
+            if ($("outtimeAmPm")) $("outtimeAmPm").value = outSplit.ampm;
+            if ($("breakTime")) $("breakTime").value = bill.break_time ?? bill.breaktime ?? 0;
+            if ($("rate")) $("rate").value = bill.rate;
+            if ($("betaRate")) $("betaRate").value = bill.beta_rate ?? 0;
 
-            const options = Array.from($("workDescription").options);
+            const workSelect = $("workDescription");
+            const options = workSelect ? Array.from(workSelect.options) : [];
             const exists = options.some(option =>
                 option.value === bill.work_description &&
                 option.value !== "Other"
             );
 
-            $("workDescription").value = exists
+            if (workSelect) workSelect.value = exists
                 ? bill.work_description : "Other";
 
             if ($("customWork")) {
-                $("customWork").classList.toggle("hidden", exists);
-                $("customWork").value = exists ? "" : bill.work_description;
+                if ($("customWork")) { $("customWork").classList.toggle("hidden", exists); $("customWork").value = exists ? "" : bill.work_description; }
             }
 
             currentBillId = bill.id;
@@ -331,44 +429,44 @@ async function loadBill(id) {
             renderBill(bill);
             showStatus("Saved bill loaded. Saving again will create another bill.");
             window.history.replaceState({}, "", "/");
-            $("new-bill").scrollIntoView({ behavior: "smooth" });
+            $("new-bill")?.scrollIntoView({ behavior: "smooth" });
         } else {
             window.location.href = `/?bill=${encodeURIComponent(id)}`;
         }
     } catch (error) {
-        alert(error.message);
+        showToast(error.message, true);
     }
 }
 
 function newBill() {
     if (!$("customerName")) return;
 
-    $("customerName").value = "";
-    $("workDescription").selectedIndex = 0;
-    $("customWork").value = "";
-    $("customWork").classList.add("hidden");
-    $("startTime").value = "08:00";
-    $("endTime").value = "12:30";
-    $("totalHours").value = "";
-    $("rate").value = "1500";
-    $("taxRate").value = "0";
+    if ($("customerName")) $("customerName").value = "";
+    if ($("workDescription")) $("workDescription").selectedIndex = 0;
+    if ($("customWork")) { $("customWork").value = ""; $("customWork").classList.add("hidden"); }
+    if ($("intimeHour")) $("intimeHour").value = "8";
+    if ($("intimeMinute")) $("intimeMinute").value = "00";
+    if ($("intimeAmPm")) $("intimeAmPm").value = "AM";
+    if ($("outtimeHour")) $("outtimeHour").value = "12";
+    if ($("outtimeMinute")) $("outtimeMinute").value = "30";
+    if ($("outtimeAmPm")) $("outtimeAmPm").value = "PM";
+    if ($("breakTime")) $("breakTime").value = "0";
+    if ($("totalHours")) $("totalHours").value = "";
+    if ($("rate")) $("rate").value = "1500";
+    if ($("betaRate")) $("betaRate").value = "5";
 
     currentBillId = null;
     lastSavedBill = null;
 
-    ["invoiceNumber", "invoiceDate", "invoiceCustomer",
-     "invoiceDescription", "invoiceTime"].forEach(id => {
+    ["billingId", "invoiceDate", "invoiceCustomer",
+     "invoiceDescription", "invoiceIntime", "invoiceBreak",
+     "invoiceOuttime"].forEach(id => {
         if ($(id)) $(id).textContent = "—";
     });
 
-    renderBill({
-        total_hours: 0, rate: 0, subtotal: 0,
-        tax_percentage: 0, tax_amount: 0, total_amount: 0,
-        customer_name: "—", work_description: "—",
-        start_time: "—", end_time: "—"
-    });
-
+    try { calculateBill(); } catch (e) {}
     showStatus("Form cleared.");
+    try { calculateBill(); } catch (e) {}
 }
 
 async function loadCustomers() {
@@ -394,7 +492,7 @@ function filterCustomers() {
 
     const query = ($("customerSearch")?.value || "").toLowerCase();
     const customers = allCustomers.filter(customer =>
-        customer.customer_name.toLowerCase().includes(query)
+        String(customer?.customer_name || "").toLowerCase().includes(query)
     );
 
     body.replaceChildren();
@@ -410,11 +508,13 @@ function filterCustomers() {
     for (const customer of customers) {
         const row = body.insertRow();
         row.insertCell().textContent = customer.customer_name;
-        row.insertCell().textContent = customer.bill_count;
-        row.insertCell().textContent = money(customer.total_spent || 0);
-        row.insertCell().textContent = customer.last_bill || "—";
+        row.insertCell().textContent = customer.total_bills;
+        row.insertCell().textContent = money(customer.total_amount || 0);
+        row.insertCell().textContent = customer.last_billing_date || "—";
     }
 }
+
+const clearBill = newBill;
 
 function printBill() {
     if (calculateBill()) window.print();
@@ -444,18 +544,26 @@ function updateClock() {
 if ($("workDescription")) {
     $("workDescription").addEventListener("change", () => {
         const other = $("workDescription").value === "Other";
-        $("customWork").classList.toggle("hidden", !other);
-        if (other) $("customWork").focus();
+        if ($("customWork")) {
+            $("customWork").classList.toggle("hidden", !other);
+            if (other) $("customWork").focus();
+        }
         currentBillId = null;
         lastSavedBill = null;
+        try { calculateBill(); } catch (e) {}
     });
 
-    ["startTime", "endTime", "rate", "taxRate", "customerName"]
+    ["intimeHour", "intimeMinute", "intimeAmPm", "outtimeHour", "outtimeMinute", "outtimeAmPm", "breakTime", "rate", "betaRate", "customerName"]
         .forEach(id => {
-            $(id).addEventListener("input", () => {
+            const el = $(id);
+            if (!el) return;
+            const handler = () => {
                 currentBillId = null;
                 lastSavedBill = null;
-            });
+                try { calculateBill(); } catch (e) {}
+            };
+            el.addEventListener("input", handler);
+            el.addEventListener("change", handler);
         });
 
     if (new URLSearchParams(window.location.search).has("bill")) {
@@ -467,3 +575,24 @@ if ($("workDescription")) {
 
 updateClock();
 setInterval(updateClock, 1000);
+
+
+async function deleteBill(id) {
+    if (!confirm("Delete this bill?")) return;
+    try {
+        const response = await fetch(`/api/bills/${id}`, { method: "DELETE" });
+        if (!response.ok) {
+            const result = await response.json();
+            throw new Error(result.error || "Unable to delete bill.");
+        }
+        showStatus("Bill deleted.");
+        // Refresh history (HTMX or full reload)
+        if (window.htmx) {
+            htmx.ajax("GET", "/partials/history", {target: "#historyBody", swap: "innerHTML"});
+        } else {
+            window.location.reload();
+        }
+    } catch (error) {
+        showStatus(error.message, true);
+    }
+}

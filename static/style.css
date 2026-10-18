@@ -1,12 +1,12 @@
 
 :root {
-    --navy: #14243b;
-    --blue: #3264e8;
-    --green: #14804a;
-    --background: #f3f6fb;
-    --border: #e0e6ef;
+    --navy: #1e3a8a;
+    --blue: #1e3a8a;
+    --green: #10b981;
+    --background: #f8fafc;
+    --border: #e2e8f0;
     --muted: #64748b;
-    --text: #182538;
+    --text: #0f172a;
 }
 
 * { box-sizing: border-box; }
@@ -346,4 +346,39 @@ table button {
     text-decoration: none;
     font-size: 19px;
     font-weight: bold;
+}
+
+.danger { background:#ef4444; color:#fff; }
+
+/* Mobile enhancements */
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  .page-container { width: 96%; padding: 16px 0; }
+  .card { padding: 14px; border-radius: 10px; }
+  .page-heading { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .page-heading h1 { font-size: 22px; }
+  .search-row { flex-direction: column; }
+  .search-row button { width: 100%; }
+  .btn { min-height: 44px; padding: 12px 14px; }
+  table { font-size: 11px; }
+  th, td { padding: 8px 6px; }
+  .invoice-card { padding: 12px; }
+  .form-grid, .two-columns { grid-template-columns: 1fr; }
+  .topbar { padding: 10px 12px; }
+  .brand strong { font-size: 16px; }
+  .nav-links a { font-size: 12px; padding: 8px 10px; }
+  .clock-box { min-width: 0; width: 100%; text-align: center; }
+  .table-scroll { -webkit-overflow-scrolling: touch; }
+  img { max-width: 100%; height: auto; }
+}
+
+@media (max-width: 480px) {
+  .feature-grid { grid-template-columns: 1fr; }
+  .invoice-top { flex-direction: column; align-items: flex-start; }
+  .bill-id-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+/* History action buttons mobile */
+@media (max-width: 640px) {
+  table button, .table-scroll a.btn { display: block; width: 100%; margin: 4px 0; text-align: center; }
 }
